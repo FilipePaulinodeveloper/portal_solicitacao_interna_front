@@ -1,0 +1,9 @@
+.kanban-theme {
+  --kb-bg: #F3F4F6;
+  --kb-surface: #FFFFFF;
+  --kb-border: #D9E7F2;
+  --kb-brand: #3B7DB5;
+  --kb-accent: #64A3D1;
+  --kb-ink: #1F2937;
+  --kb-muted: #6B7280;
+}
