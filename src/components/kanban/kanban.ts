@@ -9,6 +9,8 @@ export interface KanbanTask {
   description?: string
   categoria: Categorias
   status: Status
+  createdAt?: string
+  updatedAt?: string
   usuario?: {
     id: string
     name: string

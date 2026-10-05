@@ -9,6 +9,8 @@ interface ApiSolicitacao {
   descricao: string | null
   categoria: Categorias
   status: Status
+  created_at?: string | null
+  updated_at?: string | null
   usuario?: {
     id: string | number
     name: string
@@ -28,6 +30,8 @@ function isApiSolicitacao(value: unknown): value is ApiSolicitacao {
     && (typeof value.descricao === 'string' || value.descricao === null)
     && Object.values(Categorias).some((categoria) => categoria === value.categoria)
     && Object.values(Status).some((status) => status === value.status)
+    && (value.created_at === undefined || value.created_at === null || typeof value.created_at === 'string')
+    && (value.updated_at === undefined || value.updated_at === null || typeof value.updated_at === 'string')
     && (value.usuario === undefined
       || value.usuario === null
       || (
@@ -86,6 +90,8 @@ export async function listarSolicitacoes(
     description: solicitacao.descricao ?? undefined,
     categoria: solicitacao.categoria,
     status: solicitacao.status,
+    createdAt: solicitacao.created_at ?? undefined,
+    updatedAt: solicitacao.updated_at ?? undefined,
     usuario: solicitacao.usuario
       ? {
           id: String(solicitacao.usuario.id),
@@ -106,11 +112,36 @@ export async function criarSolicitacao(solicitacao: {
   return response.data.mensagem
 }
 
+export async function atualizarSolicitacao(
+  id: string,
+  solicitacao: {
+    titulo: string
+    descricao: string
+    categoria: Categorias
+    status?: Status
+  },
+): Promise<string | undefined> {
+  const response = await api.patch<{ mensagem?: string }>(
+    `solicitacoes/${encodeURIComponent(id)}`,
+    solicitacao,
+  )
+
+  return response.data.mensagem
+}
+
+export async function excluirSolicitacao(id: string): Promise<string | undefined> {
+  const response = await api.delete<{ mensagem?: string }>(
+    `solicitacoes/${encodeURIComponent(id)}`,
+  )
+
+  return response.data.mensagem
+}
+
 export async function atualizarStatusSolicitacao(
   id: string,
   status: Status,
 ): Promise<void> {
-  await api.put(`solicitacoes/${encodeURIComponent(id)}`, {
+  await api.patch(`solicitacoes/${encodeURIComponent(id)}/status`, {
     'status': status
-  }, )
+  })
 }

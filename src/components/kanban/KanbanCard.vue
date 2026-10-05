@@ -20,16 +20,29 @@ const initials = computed(() =>
 const emit = defineEmits<{
   (e: 'dragstart', event: DragEvent): void
   (e: 'dragend', event: DragEvent): void
+  (e: 'open'): void
 }>()
+
+function onCardKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    emit('open')
+  }
+}
 </script>
 
 <template>
   <article
     draggable="true"
-    class="group cursor-grab select-none rounded-lg border border-[var(--kb-border)] bg-[var(--kb-surface)] p-3 shadow-sm transition-colors hover:border-[var(--kb-accent)] active:cursor-grabbing"
+    role="button"
+    tabindex="0"
+    :aria-label="`Abrir detalhes da solicitação: ${task.title}`"
+    class="group cursor-pointer select-none rounded-lg border border-[var(--kb-border)] bg-[var(--kb-surface)] p-3 shadow-sm transition-colors hover:border-[var(--kb-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary-light)] active:cursor-grabbing"
     :class="{ 'opacity-40': dragging }"
     @dragstart="emit('dragstart', $event)"
     @dragend="emit('dragend', $event)"
+    @click="emit('open')"
+    @keydown="onCardKeydown"
   >
     <div class="flex items-start justify-between gap-2">
       <h3 class="min-w-0 break-words text-sm font-medium leading-snug text-[var(--kb-ink)]">{{ task.title }}</h3>

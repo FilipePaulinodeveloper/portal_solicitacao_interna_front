@@ -5,6 +5,7 @@ import { Categorias } from '@/enums/categoria'
 import { Status } from '@/enums/status'
 import KanbanColumn from './KanbanColumn.vue'
 import KanbanFilters from './KanbanFilters.vue'
+import SolicitacaoDetalhesDialog from './SolicitacaoDetalhesDialog.vue'
 import { emptyFilters, type ColumnId, type KanbanColumnDef, type KanbanTask, type SolicitacaoFilters } from './kanban'
 import { atualizarStatusSolicitacao, listarSolicitacoes } from '@/services/solicitacoes'
 
@@ -28,6 +29,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 const draggingId = ref<string | null>(null)
+const selectedTask = ref<KanbanTask | null>(null)
 const categories = Object.values(Categorias)
 const statuses = Object.values(Status)
 
@@ -88,6 +90,19 @@ watch(
 function onSolicitacaoCreated(message: string) {
   successMessage.value = message
   refreshKey.value += 1
+}
+
+function onSolicitacaoUpdated(message: string) {
+  selectedTask.value = null
+  successMessage.value = message
+  refreshKey.value += 1
+}
+
+function onSolicitacaoDeleted(message: string) {
+  const deletedId = selectedTask.value?.id
+  selectedTask.value = null
+  if (deletedId) tasks.value = tasks.value.filter((task) => task.id !== deletedId)
+  successMessage.value = message
 }
 
 function onCardDragStart({ event, id }: { event: DragEvent; id: string }) {
@@ -163,8 +178,15 @@ async function moveTask(columnId: ColumnId, beforeId?: string) {
         :dragging-id="draggingId"
         @card-dragstart="onCardDragStart"
         @card-dragend="draggingId = null"
+        @open-task="selectedTask = $event"
         @drop-task="moveTask($event.columnId, $event.beforeId)"
       />
     </div>
+    <SolicitacaoDetalhesDialog
+      :task="selectedTask"
+      @close="selectedTask = null"
+      @updated="onSolicitacaoUpdated"
+      @deleted="onSolicitacaoDeleted"
+    />
   </div>
 </template>

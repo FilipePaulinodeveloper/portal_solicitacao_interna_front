@@ -13,6 +13,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'card-dragstart', payload: { event: DragEvent; id: string }): void
   (e: 'card-dragend'): void
+  (e: 'open-task', task: KanbanTask): void
   (e: 'drop-task', payload: { columnId: ColumnId; beforeId?: string }): void
 }>()
 
@@ -55,6 +56,7 @@ function onDrop() {
           :dragging="draggingId === task.id"
           @dragstart="emit('card-dragstart', { event: $event, id: task.id })"
           @dragend="emit('card-dragend')"
+          @open="emit('open-task', task)"
         />
       </div>
 
