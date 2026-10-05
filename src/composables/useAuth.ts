@@ -10,6 +10,7 @@ export interface AuthUser {
 }
 
 const user = ref<AuthUser | null>(null)
+const userIdStorageKey = 'user_id'
 
 function parseAuthUser(value: unknown): AuthUser {
   if (typeof value !== 'object' || value === null) {
@@ -43,10 +44,12 @@ export function useAuth() {
       email,
       password,
     })
-
+    
+    const authenticatedUser = parseAuthUser(response.data.user)
     localStorage.setItem('token', response.data.token)
+    localStorage.setItem(userIdStorageKey, String(authenticatedUser.id))
 
-    user.value = parseAuthUser(response.data.user)
+    user.value = authenticatedUser
     router.push('/dashboard')
     return response.data
   }
@@ -55,20 +58,31 @@ export function useAuth() {
     await api.post('/logout')
 
     localStorage.removeItem('token')
+    localStorage.removeItem(userIdStorageKey)
 
     user.value = null
 
     router.push('/login')
   }
 
- async function getUser() {
-    const response = await api.get('/user')
+  async function getUser() {
+    const userId = user.value?.id ?? localStorage.getItem(userIdStorageKey)
+    if (userId === null) {
+      throw new Error('Não foi possível identificar o usuário logado.')
+    }
 
-    const data = response.data?.dados?.data[0]
-    console.log('getUser response.data:', response.data?.dados?.data)
-    user.value = parseAuthUser(data)
+    const response = await api.get<unknown>(`/user/${encodeURIComponent(String(userId))}`)
+    const responseData = response.data
+    const data = typeof responseData === 'object'
+      && responseData !== null
+      && 'dados' in responseData
+      ? responseData.dados
+      : responseData
+    const currentUser = parseAuthUser(data)
 
-    return data
+    user.value = currentUser
+
+    return currentUser
   }
 
   async function isAuthenticated() {
