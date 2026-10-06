@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Badge } from '@/components/ui/badge'
 import KanbanCard from './KanbanCard.vue'
 import type { ColumnId, KanbanColumnDef, KanbanTask } from './kanban'
@@ -8,6 +8,10 @@ const props = defineProps<{
   column: KanbanColumnDef
   tasks: KanbanTask[]
   draggingId: string | null
+  currentPage: number
+  lastPage: number
+  total: number
+  loading: boolean
 }>()
 
 const emit = defineEmits<{
@@ -15,10 +19,12 @@ const emit = defineEmits<{
   (e: 'card-dragend'): void
   (e: 'open-task', task: KanbanTask): void
   (e: 'drop-task', payload: { columnId: ColumnId; beforeId?: string }): void
+  (e: 'page-change', payload: { columnId: ColumnId; page: number }): void
 }>()
 
 const isOver = ref(false)
 const overCardId = ref<string | null>(null)
+const pageCount = computed(() => Math.max(1, props.lastPage))
 
 function onDrop() {
   emit('drop-task', { columnId: props.column.id, beforeId: overCardId.value ?? undefined })
@@ -41,7 +47,7 @@ function onDrop() {
         variant="outline"
         class="ml-auto rounded-full border-[var(--kb-border)] bg-[var(--kb-surface)] px-2 py-0 text-xs font-medium text-[var(--kb-brand)]"
       >
-        {{ tasks.length }}
+        {{ total }}
       </Badge>
     </header>
 
@@ -61,11 +67,41 @@ function onDrop() {
       </div>
 
       <p
-        v-if="!tasks.length"
+        v-if="!tasks.length && !loading"
         class="grid flex-1 place-items-center rounded-lg border border-dashed border-[var(--kb-border)] p-4 text-center text-xs text-[var(--kb-muted)]"
       >
         Arraste uma tarefa para cá
       </p>
+      <p v-if="loading && !tasks.length" role="status" class="p-4 text-center text-xs text-[var(--kb-muted)]">
+        Carregando solicitações…
+      </p>
     </div>
+
+    <footer
+      v-if="pageCount > 1"
+      class="flex items-center justify-between gap-2 border-t border-[var(--kb-border)] px-3 py-2"
+    >
+      <button
+        type="button"
+        class="rounded-md px-2 py-1 text-xs text-[var(--kb-brand)] hover:bg-[var(--kb-accent)]/10 disabled:cursor-not-allowed disabled:opacity-50"
+        :disabled="currentPage === 1 || loading"
+        :aria-label="`Ir para a página anterior de ${column.title}`"
+        @click="emit('page-change', { columnId: column.id, page: currentPage - 1 })"
+      >
+        Anterior
+      </button>
+      <span class="text-xs text-[var(--kb-muted)]" aria-live="polite">
+        Página {{ currentPage }} de {{ pageCount }}
+      </span>
+      <button
+        type="button"
+        class="rounded-md px-2 py-1 text-xs text-[var(--kb-brand)] hover:bg-[var(--kb-accent)]/10 disabled:cursor-not-allowed disabled:opacity-50"
+        :disabled="currentPage === pageCount || loading"
+        :aria-label="`Ir para a próxima página de ${column.title}`"
+        @click="emit('page-change', { columnId: column.id, page: currentPage + 1 })"
+      >
+        Próxima
+      </button>
+    </footer>
   </section>
 </template>

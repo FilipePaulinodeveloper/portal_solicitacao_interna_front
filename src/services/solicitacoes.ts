@@ -44,38 +44,57 @@ function isApiSolicitacao(value: unknown): value is ApiSolicitacao {
 }
 
 function getSolicitacaoRows(data: unknown): ApiSolicitacao[] {
-  let payload = data
-
-  if (isRecord(payload) && 'dados' in payload) {
-    payload = payload.dados
-  }
-
-  if (isRecord(payload) && 'data' in payload) {
-    payload = payload.data
-  }
-
-  const rows = Array.isArray(payload) ? payload : null
-
-  if (!rows || !rows.every(isApiSolicitacao)) {
+  if (!Array.isArray(data) || !data.every(isApiSolicitacao)) {
     throw new Error('A API retornou uma lista de solicitações em formato inválido.')
   }
 
-  return rows
+  return data
+}
+
+interface ApiSolicitacoesPage {
+  rows: ApiSolicitacao[]
+  currentPage: number
+  lastPage: number
+  total: number
+}
+
+function getSolicitacoesPage(data: unknown): ApiSolicitacoesPage {
+  const payload = isRecord(data) && 'dados' in data ? data.dados : data
+
+  if (
+    !isRecord(payload)
+    || !Array.isArray(payload.data)
+    || !Number.isInteger(payload.current_page)
+    || !Number.isInteger(payload.last_page)
+    || !Number.isInteger(payload.total)
+  ) {
+    throw new Error('A API retornou uma página de solicitações em formato inválido.')
+  }
+
+  return {
+    rows: getSolicitacaoRows(payload.data),
+    currentPage: payload.current_page as number,
+    lastPage: payload.last_page as number,
+    total: payload.total as number,
+  }
 }
 
 export async function listarSolicitacoes(
   filters: SolicitacaoFilters,
+  status: Status,
+  page: number,
   signal?: AbortSignal,
-): Promise<KanbanTask[]> {
+): Promise<{ tasks: KanbanTask[]; currentPage: number; lastPage: number; total: number }> {
   const params = {
     ...(filters.titulo.trim() && { titulo: filters.titulo.trim() }),
     ...(filters.descricao.trim() && { descricao: filters.descricao.trim() }),
     ...(filters.categoria && { categoria: filters.categoria }),
-    ...(filters.status && { status: filters.status }),
+    status,
+    page,
     ...(filters.data_inicio && { data_inicio: filters.data_inicio }),
     ...(filters.data_fim && { data_fim: filters.data_fim }),
   }
-  
+
   const response = await api.get<unknown>(
       'solicitacoes',
       {
@@ -84,23 +103,27 @@ export async function listarSolicitacoes(
       },
     )
 
-  return getSolicitacaoRows(response.data).map((solicitacao) => ({
-    id: String(solicitacao.id),
-    title: solicitacao.titulo,
-    description: solicitacao.descricao ?? undefined,
-    categoria: solicitacao.categoria,
-    status: solicitacao.status,
-    createdAt: solicitacao.created_at ?? undefined,
-    updatedAt: solicitacao.updated_at ?? undefined,
-    usuario: solicitacao.usuario
-      ? {
-          id: String(solicitacao.usuario.id),
-          name: solicitacao.usuario.name,
-          email: solicitacao.usuario.email,
-          avatar: solicitacao.usuario.avatar,
-        }
-      : undefined,
-  }))
+  const result = getSolicitacoesPage(response.data)
+  return {
+    ...result,
+    tasks: result.rows.map((solicitacao) => ({
+      id: String(solicitacao.id),
+      title: solicitacao.titulo,
+      description: solicitacao.descricao ?? undefined,
+      categoria: solicitacao.categoria,
+      status: solicitacao.status,
+      createdAt: solicitacao.created_at ?? undefined,
+      updatedAt: solicitacao.updated_at ?? undefined,
+      usuario: solicitacao.usuario
+        ? {
+            id: String(solicitacao.usuario.id),
+            name: solicitacao.usuario.name,
+            email: solicitacao.usuario.email,
+            avatar: solicitacao.usuario.avatar,
+          }
+        : undefined,
+    })),
+  }
 }
 
 export async function criarSolicitacao(solicitacao: {
