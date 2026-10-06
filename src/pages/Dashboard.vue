@@ -150,14 +150,17 @@ onUnmounted(() => controller?.abort())
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card class="min-w-0">
+        <CardHeader class="min-w-0">
           <CardTitle>Solicitações por status</CardTitle>
           <CardDescription>Distribuição das solicitações cadastradas.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div v-if="summary.total_solicitacoes > 0" class="grid items-center gap-6 md:grid-cols-2">
-            <ChartContainer :config="chartConfig" class="mx-auto h-64 max-w-md">
+        <CardContent class="min-w-0">
+          <div
+            v-if="summary.total_solicitacoes > 0"
+            class="grid min-w-0 grid-cols-1 items-center gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(14rem,0.8fr)]"
+          >
+            <ChartContainer :config="chartConfig" class="mx-auto h-64 w-full max-w-md min-w-0">
               <VisSingleContainer :data="chartData" :height="256">
                 <VisDonut
                   :value="(item: StatusChartItem) => item.quantidade"
@@ -169,13 +172,17 @@ onUnmounted(() => controller?.abort())
               </VisSingleContainer>
             </ChartContainer>
 
-            <ul class="grid gap-4">
-              <li v-for="item in chartData" :key="item.status" class="flex items-center justify-between gap-4">
-                <span class="flex items-center gap-2 text-sm text-foreground">
+            <ul class="grid min-w-0 gap-3 sm:gap-4">
+              <li
+                v-for="item in chartData"
+                :key="item.status"
+                class="flex min-w-0 items-center justify-between gap-3 rounded-lg border bg-card px-3 py-3 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
+              >
+                <span class="flex min-w-0 items-center gap-2 text-sm text-foreground">
                   <span class="size-3 rounded-sm" :style="{ backgroundColor: item.color }" aria-hidden="true" />
-                  {{ item.status }}
+                  <span class="break-words">{{ item.status }}</span>
                 </span>
-                <span class="font-semibold tabular-nums text-foreground">
+                <span class="shrink-0 font-semibold tabular-nums text-foreground">
                   {{ item.quantidade.toLocaleString('pt-BR') }}
                 </span>
               </li>
