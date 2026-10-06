@@ -73,14 +73,8 @@ Não coloque tokens, senhas ou outros segredos em variáveis `VITE_*`: elas são
 
 ### 4. Preparar backend e banco de dados
 
-Este repositório não inclui o backend. No projeto da API:
-
-1. Siga as instruções do backend para instalar dependências e configurar seu arquivo `.env`.
-2. Configure o banco de dados conforme o ambiente.
-3. Execute as migrações e, se disponíveis, os seeders de usuário de teste conforme a documentação do backend.
-4. Inicie a API antes de acessar o frontend.
-
-Os comandos de instalação, configuração de chaves, criação do banco e migração dependem do backend utilizado e não estão definidos neste repositório.
+Siga as intrucoes de implementação desse Backend:
+https://github.com/FilipePaulinodeveloper/portal_solicitacao_interna_back
 
 ## Executar em desenvolvimento
 
