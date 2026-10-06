@@ -18,7 +18,7 @@ Frontend web para registrar e acompanhar solicitações internas. A aplicação 
 - Vue 3, TypeScript e Vue Router.
 - Vite.
 - Tailwind CSS 4.
-- Componentes de interface baseados em Reka UI.
+- Componentes de interface baseados em Reka UI - Shadcn.
 - Gráficos com Unovis.
 - Requisições HTTP com Axios.
 - Ícones Lucide.
@@ -134,4 +134,5 @@ Não adicione senhas ou tokens reais a este README, ao código ou ao controle de
 
 ## Memorial Técnico
 
-Não há um arquivo de Memorial Técnico neste repositório. Se o projeto exigir esse documento, adicione-o separadamente e inclua aqui um link relativo, por exemplo: `[Memorial Técnico](./MEMORIAL_TECNICO.md)`.
+https://docs.google.com/document/d/1Z0i9wmPTH_kLqqwDPWvNRRwn1NxBvuGSAkCGBSYu3W0/
+
