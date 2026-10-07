@@ -32,6 +32,20 @@ Frontend web para registrar e acompanhar solicitações internas. A aplicação 
 
 O frontend não contém servidor, banco de dados, migrações ou configuração de banco. Consulte as instruções do projeto de backend para preparar esses recursos.
 
+## Instalação do Node.js
+
+O projeto utiliza o Node.js v24.13.1. Para instalar a versão utilizada no projeto, acesse:
+https://nodejs.org/en/download/archive/v24.13.1
+Após a instalação, verifique se o Node.js e o npm foram instalados corretamente:
+
+node -v
+npm -v
+
+A versão do Node.js esperada é:
+
+v24.13.1
+
+
 ## Instalação e configuração
 
 ### 1. Obter o código
